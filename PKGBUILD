@@ -1,12 +1,13 @@
 # Maintainer: Bruno Pagani <archange@archlinux.org>
 # Maintainer: Caleb Maclennan <caleb@alerque.com>
+# Contributor: Pascal Ernster <archlinux@hardfalcon.net>
 
-# Remember to handle https://bugs.archlinux.org/task/74324 on major upgrades
-_use_suffix=0
-pkgver=22.3.10
-_commit=672c31283ab4da7697c8b81d78a33fd1af334474
-_chromiumver=108.0.5359.215
-_gcc_patchset=2
+# https://releases.electronjs.org/
+# https://github.com/stha09/chromium-patches/releases
+
+_use_suffix=1
+pkgver=24.4.1
+_chromiumver=112.0.5615.204
 # shellcheck disable=SC2034
 pkgrel=1
 
@@ -25,7 +26,7 @@ url='https://electronjs.org/'
 # shellcheck disable=SC2034
 license=('MIT' 'custom')
 # shellcheck disable=SC2034
-depends=('c-ares' 'gtk3' 'libevent' 'nss' 'wayland')
+depends=('c-ares' 'gtk3' 'libevent' 'nss' 'libffi' 'wayland')
 # shellcheck disable=SC2034
 makedepends=('clang' 'git' 'gn' 'gperf' 'harfbuzz-icu' 'http-parser'
              'qt5-base' 'java-runtime-headless' 'libnotify' 'lld' 'llvm'
@@ -47,38 +48,62 @@ fi
 # shellcheck disable=SC2034
 options=('!lto') # Electron adds its own flags for ThinLTO
 # shellcheck disable=SC2034
-source=('git+https://github.com/electron/electron.git'
+source=("git+https://github.com/electron/electron.git#tag=v$pkgver"
         'git+https://chromium.googlesource.com/chromium/tools/depot_tools.git#branch=main'
-        "https://github.com/stha09/chromium-patches/releases/download/chromium-${_chromiumver%%.*}-patchset-${_gcc_patchset}/chromium-${_chromiumver%%.*}-patchset-${_gcc_patchset}.tar.xz"
+        "chromium::git+https://chromium.googlesource.com/chromium/src.git#tag=$_chromiumver"
         "electron-launcher.sh"
         "electron.desktop"
         'default_app-icon.patch'
         'jinja-python-3.10.patch'
         'use-system-libraries-in-node.patch'
         'std-vector-non-const.patch'
-        're-fix-TFLite-build-error-on-linux-with-system-zlib.patch'
-        'chromium-icu72.patch'
-        'v8-enhance-Date-parser-to-take-Unicode-SPACE.patch'
-        'REVERT-roll-src-third_party-ffmpeg-m102.patch'
-        'REVERT-roll-src-third_party-ffmpeg-m106.patch'
-        'angle-wayland-include-protocol.patch'
+        'sql-relax-constraints-on-VirtualCursor-layout.patch'
+        'swiftshader-add-cstdint-for-uint64_t.patch'
+        'dawn-iwyu-add-cstdint-for-uint8_t.patch'
+        'iwyu-add-stdint.h-for-various-int-types-in-base.patch'
+        'iwyu-add-cstdint-for-uintptr_t-in-device.patch'
+        'iwyu-add-stdint.h-for-uint32_t-in-chrome_pdf.patch'
+        'iwyu-add-stdint.h-for-uint64_t-in-EncounteredSurface.patch'
+        'iwyu-add-stdint.h-for-integer-types-in-ui.patch'
+        'openscreen-iwyu-add-stdint.h.patch'
+        'pdfium-iwyu-add-stdint.h-for-uint32_t.patch'
+        'iwyu-add-stdint.h-for-uint32_t-in-cc.patch'
+        'add-missing-includes-causing-build-errors.patch'
+        'iwyu-add-stdint.h-for-int-types-in-gpu_feature_info.patch'
+        'iwyu-add-stdint.h-for-various-int-types-in-comp.patch'
+        'iwyu-add-stdint.h-for-various-integer-types-in-net.patch'
+        'iwyu-add-cstdint-for-int-types-in-s2cellid.patch'
+        'random-fixes-for-gcc13.patch'
+        'more-fixes-for-gcc13.patch'
        )
 # shellcheck disable=SC2034
 sha256sums=('SKIP'
             'SKIP'
-            '40ef8af65e78901bb8554eddbbb5ebc55c0b8e7927f6ca51b2a353d1c7c50652'
+            'SKIP'
             '77817939c9833f8dda74a8c75620c15747170551ffa6f14f7c5b4071599e8831'
             '4484200d90b76830b69eea3a471c103999a3ce86bb2c29e6c14c945bf4102bae'
             'dd2d248831dd4944d385ebf008426e66efe61d6fdf66f8932c963a12167947b4'
             '55dbe71dbc1f3ab60bf1fa79f7aea7ef1fe76436b1d7df48728a1f8227d2134e'
             'ff588a8a4fd2f79eb8a4f11cf1aa151298ffb895be566c57cc355d47f161f53f'
             '893bc04c7fceba2f0a7195ed48551d55f066bbc530ec934c89c55768e6f3949c'
-            '9015b9d6d5b4c1e7248d6477a4b4b6bd6a3ebdc57225d2d8efcd79fc61790716'
-            'dabb5ab204b63be73d3c5c8b7c1fa74053105a285852ba3bbc4fb77646608572'
-            'b83406a881d66627757d9cbc05e345cbb2bd395a48b6d4c970e5e1cb3f6ed454'
-            '30df59a9e2d95dcb720357ec4a83d9be51e59cc5551365da4c0073e68ccdec44'
-            '4c12d31d020799d31355faa7d1fe2a5a807f7458e7f0c374adf55edb37032152'
-            'cd0d9d2a1d6a522d47c3c0891dabe4ad72eabbebc0fe5642b9e22efa3d5ee572')
+            'e66be069d932fe18811e789c57b96249b7250257ff91a3d82d15e2a7283891b7'
+            '208f2ebcef5c690207e6e798ffbf9e92214e9d35f415c2f6b93efebad831b7e2'
+            '94baaaa6fbec0af6ec2e967f0b7440b4261a927e853e212d84f0aeaf56ae53f0'
+            '0003e737072f4f1b22ff932221595e85dd9bf65720ccac36f840cccb8000e3e1'
+            'ffe499d63c9c1074cbc3995c188c89b748388dbb9dccf975ce28a434c723acf7'
+            '7af466e4b5985cc9f0b33df2f3cd2e458c7cbfd7190505d105aad4401c9d072b'
+            '727588a1b42f6cfe54acf4759a0c3ad3778590d5a5cefcdcb54b579ba16b09c8'
+            '0914be53b2205b34e4da96f5a94505ac2a01e3639ff433535a23be2d0d581fa7'
+            '8c9662bed23bfd66ae76d044541f316624386ca4b3baef57a47289feb3db58a9'
+            '890b6836cea4c31513166db720b210da20d20bcd97a713545268cceffd707af5'
+            'f6a0e149ef5195883c56a875ae366ed92d9960652f2657bfb65b5408badafc65'
+            '3255477d02d49ef86d47c727b9369f46dc787319bb648bf267a68f37e2041e50'
+            '94995b4e37671dcd27968bd5a2ebcf50e67bd22659a4bb4a5d0a4f81ff54f471'
+            '6b3c296de83c333678bc3d7cac939f33bbadae94c96299566ff2e31121c46256'
+            '5dfbfd073f78c887bbffca2b644116571cc9b1196867e44e8fc0cbb40afcf1bc'
+            'd97dc00f66fa5868584e4b6d5ef817911eab2dc8022a37c75a00d063f4dac483'
+            '3fb0636e9560760d99e7c9606b1c9b59eef9d91ed3419cc95b43302759f249be'
+            '9d1f69f668e12fc14b4ccbcf88cb5a3acf666df06dafa8834f037bd8110ca17f')
 
 # Possible replacements are listed in build/linux/unbundle/replace_gn_files.py
 # Keys are the names in the above script; values are the dependencies in Arch
@@ -93,7 +118,7 @@ declare -gA _system_libs=(
   [icu]=icu
   [jsoncpp]=jsoncpp
   [libaom]=aom
-  [libavif]=libavif
+  #[libavif]=libavif # https://github.com/AOMediaCodec/libavif/commit/4d2776a3
   [libdrm]=
   [libjpeg]=libjpeg
   [libpng]=libpng
@@ -125,7 +150,7 @@ cat >.gclient <<EOF
 solutions = [
   {
     "name": "src/electron",
-    "url": "file://${srcdir}/electron@${_commit}",
+    "url": "file://${srcdir}/electron@v$pkgver",
     "deps_file": "DEPS",
     "managed": False,
     "custom_deps": {
@@ -139,8 +164,8 @@ EOF
   export PATH+=":$PWD/depot_tools" DEPOT_TOOLS_UPDATE=0
   export VPYTHON_BYPASS='manually managed python not supported by chrome operations'
 
-  echo "Fetching chromium..."
-  git clone -b ${_chromiumver} --depth=2 https://chromium.googlesource.com/chromium/src
+  echo "Linking chromium from sources..."
+  ln -s chromium src
 
   depot_tools/gclient.py sync -D \
       --nohooks \
@@ -179,28 +204,32 @@ EOF
 
   echo "Applying local patches..."
 
-  # Upstream fixes
-  patch -Np1 -i ../re-fix-TFLite-build-error-on-linux-with-system-zlib.patch
-  patch -Np1 -i ../chromium-icu72.patch
-  patch -Np1 -d v8 <../v8-enhance-Date-parser-to-take-Unicode-SPACE.patch
+  # chromium upstream fixes
+  patch -Np1 -i "${srcdir}/sql-relax-constraints-on-VirtualCursor-layout.patch"
 
-  # Revert ffmpeg roll requiring new channel layout API support
-  # https://crbug.com/1325301
-  patch -Rp1 -i ../REVERT-roll-src-third_party-ffmpeg-m102.patch
-  # Revert switch from AVFrame::pkt_duration to AVFrame::duration
-  patch -Rp1 -i ../REVERT-roll-src-third_party-ffmpeg-m106.patch
-
-  # https://crbug.com/angleproject/7582
-  patch -Np0 -i ../angle-wayland-include-protocol.patch
-
-  # Fixes for building with libstdc++ instead of libc++
-  patch -Np1 -i ../patches/chromium-103-VirtualCursor-std-layout.patch
+  # GCC13 patches for chromium (https://github.com/archlinux/svntogit-packages/commit/470e5cbc7b58b4955664cdae386161d22c17d980)
+  patch -Np1 -i "${srcdir}/swiftshader-add-cstdint-for-uint64_t.patch" -d "third_party/swiftshader"
+  patch -Np1 -i "${srcdir}/dawn-iwyu-add-cstdint-for-uint8_t.patch" -d "third_party/dawn"
+  patch -Np1 -i "${srcdir}/iwyu-add-stdint.h-for-various-int-types-in-base.patch"
+  patch -Np1 -i "${srcdir}/iwyu-add-cstdint-for-uintptr_t-in-device.patch"
+  patch -Np1 -i "${srcdir}/iwyu-add-stdint.h-for-uint32_t-in-chrome_pdf.patch"
+  patch -Np1 -i "${srcdir}/iwyu-add-stdint.h-for-uint64_t-in-EncounteredSurface.patch"
+  patch -Np1 -i "${srcdir}/iwyu-add-stdint.h-for-integer-types-in-ui.patch"
+  patch -Np1 -i "${srcdir}/openscreen-iwyu-add-stdint.h.patch" -d "third_party/openscreen/src"
+  patch -Np1 -i "${srcdir}/pdfium-iwyu-add-stdint.h-for-uint32_t.patch" -d "third_party/pdfium"
+  patch -Np1 -i "${srcdir}/iwyu-add-stdint.h-for-uint32_t-in-cc.patch"
+  patch -Np1 -i "${srcdir}/add-missing-includes-causing-build-errors.patch"
+  patch -Np1 -i "${srcdir}/iwyu-add-stdint.h-for-int-types-in-gpu_feature_info.patch"
+  patch -Np1 -i "${srcdir}/iwyu-add-stdint.h-for-various-int-types-in-comp.patch"
+  patch -Np1 -i "${srcdir}/iwyu-add-stdint.h-for-various-integer-types-in-net.patch"
+  patch -Np1 -i "${srcdir}/iwyu-add-cstdint-for-int-types-in-s2cellid.patch"
+  patch -Np1 -i "${srcdir}/random-fixes-for-gcc13.patch"
+  patch -Np1 -i "${srcdir}/more-fixes-for-gcc13.patch"
 
   # Electron specific fixes
-  patch -d third_party/electron_node/tools/inspector_protocol/jinja2 \
-    -Np1 -i ../../../../../../jinja-python-3.10.patch
-  patch -Np1 -i ../use-system-libraries-in-node.patch
-  patch -Np1 -i ../default_app-icon.patch  # Icon from .desktop file
+  patch -Np1 -i "${srcdir}/jinja-python-3.10.patch" -d "third_party/electron_node/tools/inspector_protocol/jinja2"
+  patch -Np1 -i "${srcdir}/use-system-libraries-in-node.patch"
+  patch -Np1 -i "${srcdir}/default_app-icon.patch"  # Icon from .desktop file
 
   # Allow building against system libraries in official builds
   echo "Patching Chromium for using system libraries..."
@@ -275,7 +304,7 @@ build() {
     clang_base_path = "/usr"
     clang_use_chrome_plugins = false
     symbol_level = 0 # sufficient for backtraces on x86(_64)
-    chrome_pgo_phase = 2
+    chrome_pgo_phase = 0
     treat_warnings_as_errors = false
     disable_fieldtrial_testing_config = true
     blink_enable_generated_code_formatting = false
@@ -285,6 +314,7 @@ build() {
     use_custom_libcxx = false
     use_gnome_keyring = false
     use_sysroot = false
+    use_system_libffi = true
     use_system_libwayland = true
     use_system_wayland_scanner = true
     icu_use_data_file = false
